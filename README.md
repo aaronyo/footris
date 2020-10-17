@@ -1,2 +1,2 @@
-# sirtet
-tetris clone
+# footris
+1 millionth tetris clone
