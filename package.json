@@ -1,0 +1,26 @@
+{
+  "name": "footris",
+  "version": "0.0.1",
+  "description": "1 millionth Tetris clone",
+  "main": "index.js",
+  "repository": "git@github.com:aaronyo/footris.git",
+  "author": "Aaron Boyd <aaron.t.boyd@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "parcel src/index.html",
+    "build": "parcel build src/index.html --public-url ./",
+    "build-serve": "yarn build && http-server ./dist",
+    "clean": "rimraf ./dist ./.cache"
+  },
+  "dependencies": {
+    "eslint": "^7.11.0",
+    "parcel": "^1.12.4",
+    "pixi.js": "^5.3.3",
+    "prettier": "^2.1.2",
+    "rimraf": "^3.0.2"
+  },
+  "devDependencies": {
+    "typescript": "^4.0.3"
+  }
+}

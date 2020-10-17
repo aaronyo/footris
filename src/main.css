@@ -1,0 +1,15 @@
+body {
+    margin:0;
+    padding:0;
+    overflow:hidden;
+    background-color: white;
+}
+
+canvas {
+    display:block;
+    image-rendering: pixelated;
+    position: absolute;
+    margin: auto;
+    top: 0px;
+    bottom: 0px;
+}
