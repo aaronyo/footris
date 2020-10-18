@@ -1,4 +1,5 @@
 // Load application styles
+import { makeKeyState } from './keyboard';
 import * as PIXI from 'pixi.js';
 
 const BOARD_WIDTH = 100;
@@ -90,6 +91,13 @@ export const makeGame = () => {
 
   window.onresize = resizeCanvas;
 
+  const controls = makeKeyState({
+    leftCode: 'ArrowLeft',
+    rightCode: 'ArrowRight',
+    rotateCode: 'ArrowUp',
+    downCode: 'ArrowDown',
+  });
+
   game.loader.load(() => {
     let board = parseBoard(startingBoard);
     let gfx = new PIXI.Graphics();
@@ -99,6 +107,7 @@ export const makeGame = () => {
     let elapsed = 0;
     let gameTicks = 0;
     const update = () => {
+      if (controls.left.isDown) console.log('left');
       elapsed += game.ticker.deltaMS;
       if (elapsed / 500 > 1) {
         gameTicks += 1;
