@@ -8,6 +8,46 @@ const ASPECT_RATIO = BOARD_HEIGHT / BOARD_WIDTH;
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
+// prettier-ignore
+const shapes = {
+  s:
+`
+.ss
+ss.
+...
+`,
+  z:
+`
+zz.
+.zz
+...
+`,
+  o:
+`
+oo
+oo
+`,
+  l:
+`
+.l.
+.l.
+.ll
+`,
+  j:
+`
+.j.
+.j.
+jj.
+`,
+  i:
+`
+.i..
+.i..
+.i..
+.i..
+`
+};
+
 const startingBoard = `
 ...ss.....
 ..ss......
