@@ -1,10 +1,9 @@
 // Load application styles
 import * as PIXI from 'pixi.js';
 
-import saucerImg from '../../assets/saucer.png';
-
-const VIEWPORT_WIDTH = 320;
-const VIEWPORT_HEIGHT = 240;
+const GAME_PLAY_WIDTH = 320;
+const GAME_PLAY_HEIGHT = 240;
+const ASPECT_RATIO = GAME_PLAY_HEIGHT / GAME_PLAY_WIDTH;
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
@@ -15,14 +14,14 @@ export const makeGame = () => {
 
   const game = new PIXI.Application({
     backgroundColor: 0x000000,
-    width: VIEWPORT_WIDTH,
-    height: VIEWPORT_HEIGHT,
+    width: GAME_PLAY_WIDTH,
+    height: GAME_PLAY_HEIGHT,
     resolution: 1,
   });
 
   const resizeCanvas = () => {
     game.view.style.width = window.innerWidth + 'px';
-    game.view.style.height = (window.innerWidth * 9) / 16 + 'px';
+    game.view.style.height = window.innerWidth * ASPECT_RATIO + 'px';
     game.view.style.imageRendering = 'pixelated';
     game.view.style.position = 'absolute';
     game.view.style.top = '0px';
@@ -34,19 +33,23 @@ export const makeGame = () => {
   window.onresize = resizeCanvas;
 
   game.loader.load(() => {
-    const saucerTexture = PIXI.Texture.from(saucerImg);
-    const saucerSprite = PIXI.Sprite.from(saucerTexture);
-    game.stage.addChild(saucerSprite);
+    const gfx = new PIXI.Graphics();
+    gfx.beginFill(0xffffff);
+    gfx.lineStyle(2, 0x57cdff, 1, 0);
+    gfx.drawRect(11, 0, 10, 10);
+    gfx.drawRect(22, 0, 10, 10);
+    gfx.drawRect(0, 11, 10, 10);
+    gfx.drawRect(11, 11, 10, 10);
+    game.stage.addChild(gfx);
 
-    let counter = 0;
-    function play(delta: number) {
-      counter += delta;
-      saucerSprite.position.x =
-        (saucerSprite.position.x + delta) % VIEWPORT_WIDTH;
-      saucerSprite.position.y = Math.cos(counter / 15) * 50 + 100;
-    }
+    let time = 0;
+    const update = (deltaTime: number) => {
+      time += deltaTime;
+      gfx.position.x = (gfx.position.x + deltaTime) % GAME_PLAY_WIDTH;
+      gfx.position.y = Math.cos(time / 15) * 50 + 100;
+    };
 
-    game.ticker.add(play);
+    game.ticker.add(update);
   });
 
   return game;
