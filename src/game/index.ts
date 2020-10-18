@@ -1,11 +1,69 @@
 // Load application styles
 import * as PIXI from 'pixi.js';
 
-const GAME_PLAY_WIDTH = 320;
-const GAME_PLAY_HEIGHT = 240;
-const ASPECT_RATIO = GAME_PLAY_HEIGHT / GAME_PLAY_WIDTH;
+const BOARD_WIDTH = 100;
+const BOARD_HEIGHT = 200;
+const ASPECT_RATIO = BOARD_HEIGHT / BOARD_WIDTH;
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+
+const startingBoard = `
+...ss.....
+..ss......
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+`;
+
+type Board = string[][];
+
+const parseBoard = (text: string): Board => {
+  return text
+    .trim()
+    .split('\n')
+    .map((line) => line.split(''));
+};
+
+const drawCell = (x: number, y: number, char: string, gfx: PIXI.Graphics) => {
+  switch (char) {
+    case 's':
+      gfx.beginFill(0xffffff);
+      gfx.lineStyle(2, 0x57cdff, 1, 0);
+      break;
+    default:
+      gfx.beginFill(0x000000);
+      gfx.lineStyle(0, 0x000000, 0, 0);
+      break;
+  }
+  gfx.drawRect(x * 10, y * 10, 9, 9);
+};
+
+const drawBoard = (board: Board, gfx: PIXI.Graphics) => {
+  board.forEach((line, y) => {
+    line.forEach((char, x) => {
+      drawCell(x, y, char, gfx);
+    });
+  });
+};
+
+const updateBoard = (board: Board): Board => {
+  return ['..........'.split('')].concat(board.slice(0, -1));
+};
 
 export const makeGame = () => {
   // The application will create a renderer using WebGL, if possible,
@@ -14,18 +72,18 @@ export const makeGame = () => {
 
   const game = new PIXI.Application({
     backgroundColor: 0x000000,
-    width: GAME_PLAY_WIDTH,
-    height: GAME_PLAY_HEIGHT,
+    width: BOARD_WIDTH,
+    height: BOARD_HEIGHT,
     resolution: 1,
   });
 
   const resizeCanvas = () => {
-    game.view.style.width = window.innerWidth + 'px';
-    game.view.style.height = window.innerWidth * ASPECT_RATIO + 'px';
+    game.view.style.width = window.innerHeight / ASPECT_RATIO + 'px';
+    game.view.style.height = window.innerHeight + 'px';
     game.view.style.imageRendering = 'pixelated';
     game.view.style.position = 'absolute';
-    game.view.style.top = '0px';
-    game.view.style.bottom = '0px';
+    game.view.style.left = '0px';
+    game.view.style.right = '0px';
     game.view.style.margin = 'auto';
   };
   resizeCanvas();
@@ -33,20 +91,23 @@ export const makeGame = () => {
   window.onresize = resizeCanvas;
 
   game.loader.load(() => {
-    const gfx = new PIXI.Graphics();
-    gfx.beginFill(0xffffff);
-    gfx.lineStyle(2, 0x57cdff, 1, 0);
-    gfx.drawRect(11, 0, 10, 10);
-    gfx.drawRect(22, 0, 10, 10);
-    gfx.drawRect(0, 11, 10, 10);
-    gfx.drawRect(11, 11, 10, 10);
+    let board = parseBoard(startingBoard);
+    let gfx = new PIXI.Graphics();
     game.stage.addChild(gfx);
+    drawBoard(board, gfx);
 
-    let time = 0;
-    const update = (deltaTime: number) => {
-      time += deltaTime;
-      gfx.position.x = (gfx.position.x + deltaTime) % GAME_PLAY_WIDTH;
-      gfx.position.y = Math.cos(time / 15) * 50 + 100;
+    let elapsed = 0;
+    let gameTicks = 0;
+    const update = () => {
+      elapsed += game.ticker.deltaMS;
+      if (elapsed / 500 > 1) {
+        gameTicks += 1;
+        elapsed = 0;
+        board =
+          gameTicks % 21 === 0 ? parseBoard(startingBoard) : updateBoard(board);
+        gfx.clear();
+        drawBoard(board, gfx);
+      }
     };
 
     game.ticker.add(update);
