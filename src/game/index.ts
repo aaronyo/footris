@@ -10,6 +10,12 @@ PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
 // prettier-ignore
 const shapes = {
+  t:
+`
+...
+ttt
+.t.
+`,
   s:
 `
 .ss
