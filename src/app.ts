@@ -8,52 +8,6 @@ const ASPECT_RATIO = BOARD_HEIGHT / BOARD_WIDTH;
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
-// prettier-ignore
-const shapes = {
-  t:
-`
-...
-ttt
-.t.
-`,
-  s:
-`
-.ss
-ss.
-...
-`,
-  z:
-`
-zz.
-.zz
-...
-`,
-  o:
-`
-oo
-oo
-`,
-  l:
-`
-.l.
-.l.
-.ll
-`,
-  j:
-`
-.j.
-.j.
-jj.
-`,
-  i:
-`
-.i..
-.i..
-.i..
-.i..
-`
-};
-
 const startingBoard = `
 ...ss.....
 ..ss......
@@ -112,12 +66,12 @@ const updateBoard = (board: Board): Board => {
   return ['..........'.split('')].concat(board.slice(0, -1));
 };
 
-export const makeGame = () => {
+export const makeApp = () => {
   // The application will create a renderer using WebGL, if possible,
   // with a fallback to a canvas render. It will also setup the ticker
   // and the root stage PIXI.Container
 
-  const game = new PIXI.Application({
+  const app = new PIXI.Application({
     backgroundColor: 0x000000,
     width: BOARD_WIDTH,
     height: BOARD_HEIGHT,
@@ -125,13 +79,13 @@ export const makeGame = () => {
   });
 
   const resizeCanvas = () => {
-    game.view.style.width = window.innerHeight / ASPECT_RATIO + 'px';
-    game.view.style.height = window.innerHeight + 'px';
-    game.view.style.imageRendering = 'pixelated';
-    game.view.style.position = 'absolute';
-    game.view.style.left = '0px';
-    game.view.style.right = '0px';
-    game.view.style.margin = 'auto';
+    app.view.style.width = window.innerHeight / ASPECT_RATIO + 'px';
+    app.view.style.height = window.innerHeight + 'px';
+    app.view.style.imageRendering = 'pixelated';
+    app.view.style.position = 'absolute';
+    app.view.style.left = '0px';
+    app.view.style.right = '0px';
+    app.view.style.margin = 'auto';
   };
   resizeCanvas();
 
@@ -144,29 +98,29 @@ export const makeGame = () => {
     downCode: 'ArrowDown',
   });
 
-  game.loader.load(() => {
+  app.loader.load(() => {
     let board = parseBoard(startingBoard);
     let gfx = new PIXI.Graphics();
-    game.stage.addChild(gfx);
+    app.stage.addChild(gfx);
     drawBoard(board, gfx);
 
     let elapsed = 0;
-    let gameTicks = 0;
+    let appTicks = 0;
     const update = () => {
       if (controls.left.isDown) console.log('left');
-      elapsed += game.ticker.deltaMS;
+      elapsed += app.ticker.deltaMS;
       if (elapsed / 500 > 1) {
-        gameTicks += 1;
+        appTicks += 1;
         elapsed = 0;
         board =
-          gameTicks % 21 === 0 ? parseBoard(startingBoard) : updateBoard(board);
+          appTicks % 21 === 0 ? parseBoard(startingBoard) : updateBoard(board);
         gfx.clear();
         drawBoard(board, gfx);
       }
     };
 
-    game.ticker.add(update);
+    app.ticker.add(update);
   });
 
-  return game;
+  return app;
 };

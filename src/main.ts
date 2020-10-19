@@ -1,6 +1,6 @@
-import { makeGame } from './game';
+import { makeApp } from './app';
 
-const gameApp = makeGame();
+const gameApp = makeApp();
 
 // The application will create a canvas element for you that you
 // can then insert into the DOM
