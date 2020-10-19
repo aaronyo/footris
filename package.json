@@ -15,10 +15,13 @@
     "clean": "rimraf ./dist ./.cache"
   },
   "dependencies": {
+    "@types/ramda": "^0.27.29",
     "eslint": "^7.11.0",
+    "immer": "^7.0.9",
     "parcel": "^1.12.4",
     "pixi.js": "^5.3.3",
     "prettier": "^2.1.2",
+    "ramda": "^0.27.1",
     "rimraf": "^3.0.2"
   },
   "devDependencies": {
