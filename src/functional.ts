@@ -2,7 +2,14 @@ import * as R from 'ramda';
 export * from 'ramda';
 
 export const mapIndexed = R.addIndex(R.map);
-export const forEachIndexed = R.addIndex(R.forEach);
+export const forEachIndexed = <T extends unknown>(
+  fn: (v: T, i: number) => void,
+  arr: ReadonlyArray<T>,
+) => {
+  for (let i = 0; i < arr.length; i++) {
+    fn(arr[i], i);
+  }
+};
 
 //eslint-disable-next-line @typescript-eslint/no-empty-function
 export const noop = () => {};

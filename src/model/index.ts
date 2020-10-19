@@ -48,8 +48,8 @@ const emptyBoard = Object.freeze(parseRegion(specs.emptyBoard));
 // is easier to move and rotate;
 const shapeCoords = (fs: Shape) => {
   const coords: { x: number; y: number }[] = [];
-  _.forEachIndexed((row: BoardChar[], i) => {
-    _.forEachIndexed((cell: BoardChar, j) => {
+  _.forEachIndexed((row, i) => {
+    _.forEachIndexed((cell, j) => {
       if (cell !== '.') {
         coords.push({ y: fs.pos.y + i, x: fs.pos.x + j });
       }
