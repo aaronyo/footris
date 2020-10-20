@@ -29,6 +29,21 @@ const bindKey = (
   window.addEventListener('keyup', upHandler, false);
 };
 
+const whileKeyPressed = (millis: number, keyCode: string) => (
+  callback: () => void,
+) => {
+  let interval: number;
+  bindKey(keyCode, {
+    press: () => {
+      callback();
+      interval = window.setInterval(callback, millis);
+    },
+    release: () => {
+      clearInterval(interval);
+    },
+  });
+};
+
 const bindKeyToState = (keyCode: string, state: { isDown: boolean }) => {
   bindKey(keyCode, {
     press: () => {
@@ -66,4 +81,24 @@ export const makeKeyState = ({
   return state;
 };
 
+export const makeController = ({
+  leftCode,
+  rightCode,
+  rotateCode,
+  downCode,
+}: {
+  leftCode: string;
+  rightCode: string;
+  rotateCode: string;
+  downCode: string;
+}) => {
+  return {
+    whileLeftPressed: whileKeyPressed(200, leftCode),
+    whileRightPressed: whileKeyPressed(200, rightCode),
+    whileRotatePressed: whileKeyPressed(200, rotateCode),
+    whileDownPressed: whileKeyPressed(200, downCode),
+  };
+};
+
 export type KeyState = ReturnType<typeof makeKeyState>;
+export type Controller = ReturnType<typeof makeController>;

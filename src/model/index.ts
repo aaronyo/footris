@@ -1,65 +1,51 @@
-import * as specs from './specs';
+import * as srs from './srs';
 import _ from '../functional';
 import produce from 'immer';
-import { KeyState } from '../keyboard';
-import { rotate } from '../util';
+import { Controller } from '../keyboard';
+import { parseRegion, Shape, shapeNames, shapeCoords } from './util';
 
-export type ShapeChar = 'S' | 'Z' | 'L' | 'J' | 'T' | 'O' | 'I';
-export type BoardChar = ShapeChar | '.';
-export type ShapeName = ShapeChar;
-
-export type Form = ReadonlyArray<ReadonlyArray<BoardChar>>;
-export type Board = Form;
-
-const parseRegion = (text: string): Board => {
-  return text
-    .trim()
-    .split('\n')
-    .map((line) => line.split('')) as Board;
-};
-
-interface Shape {
-  pos: {
-    x: number;
-    y: number;
-  };
-  form: Form;
-  name: ShapeName;
-}
+const emptyBoard = Object.freeze(
+  parseRegion(`
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+`),
+);
 
 const spawn = (): Shape => {
-  const name = _.randomKey(specs.shapes) as ShapeName;
-  const form = parseRegion(specs.shapes[name]) as Form;
+  const name = _.randomFrom(shapeNames);
   return {
     pos: {
-      y: 0 - form.length,
-      x: 4,
+      y: -3,
+      x: 3,
     },
-    form,
+    rotation: 0,
     name,
   };
 };
 
-const emptyBoard = Object.freeze(parseRegion(specs.emptyBoard));
-
-// Returns an array containing {x,y} coordinates for every tile
-// in the shape. This representation is convenient for patching the
-// 2D board array, while the input 'Shape' form, having a single coordinae,
-// is easier to move and rotate;
-const shapeCoords = (fs: Shape) => {
-  const coords: { x: number; y: number }[] = [];
-  _.forEachIndexed((row, i) => {
-    _.forEachIndexed((cell, j) => {
-      if (cell !== '.') {
-        coords.push({ y: fs.pos.y + i, x: fs.pos.x + j });
-      }
-    }, row);
-  }, fs.form);
-  return coords;
-};
-
 const makeBoard = (fallingShape: Shape) => {
-  const coords = shapeCoords(fallingShape);
+  const coords = shapeCoords(
+    srs.getForm(fallingShape.name, fallingShape.rotation),
+    fallingShape.pos,
+  );
   return produce(emptyBoard, (draft) => {
     for (const coord of coords) {
       if (coord.y >= 0) {
@@ -69,30 +55,43 @@ const makeBoard = (fallingShape: Shape) => {
   });
 };
 
-const rotateShape = (s: Shape) => {
+const shiftShape = (increment: number, s: Shape) => {
   return produce(s, (draft) => {
-    draft.form = rotate(s.form);
+    draft.pos.x += increment;
   });
 };
 
-export const makeModel = (keyState: KeyState) => {
+export const makeModel = (controller: Controller) => {
   let fallingShape = spawn();
-  const tickDuration = 500;
-  let tickElapsed = 0;
+  const fallDuration = 500;
   let board = emptyBoard;
+  let dirty = false;
+  controller.whileRotatePressed(() => {
+    fallingShape = srs.rotateShape(board, 1, fallingShape);
+    dirty = true;
+  });
 
-  const updateBoard = (deltaMillis: number) => {
-    tickElapsed += deltaMillis;
-    if (keyState.rotate.isDown) {
-      fallingShape = rotateShape(fallingShape);
+  controller.whileLeftPressed(() => {
+    fallingShape = shiftShape(-1, fallingShape);
+    dirty = true;
+  });
+
+  controller.whileRightPressed(() => {
+    fallingShape = shiftShape(1, fallingShape);
+    dirty = true;
+  });
+
+  const fallInterval = setInterval(() => {
+    fallingShape = produce(fallingShape, (draft) => {
+      draft.pos.y += 1;
+    });
+    dirty = true;
+  }, fallDuration);
+
+  const updateBoard = () => {
+    if (dirty) {
       board = makeBoard(fallingShape);
-    }
-    if (tickElapsed / tickDuration > 1) {
-      tickElapsed = 0;
-      fallingShape = produce(fallingShape, (draft) => {
-        draft.pos.y += 1;
-      });
-      board = makeBoard(fallingShape);
+      dirty = false;
     }
     return board;
   };

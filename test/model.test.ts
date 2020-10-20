@@ -1,4 +1,4 @@
-import { rotate } from '../src/game/util';
+import { rotateClockwise } from '../src/model/srs';
 
 describe('Utils Test', () => {
   test('Test if test works... great', () => {
@@ -12,6 +12,6 @@ describe('Utils Test', () => {
       [8, 5, 2],
       [9, 6, 3],
     ];
-    expect(rotate(initial)).toStrictEqual(rotatedClockwise);
+    expect(rotateClockwise(initial)).toStrictEqual(rotatedClockwise);
   });
 });

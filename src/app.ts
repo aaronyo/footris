@@ -1,5 +1,5 @@
 // Load application styles
-import { makeKeyState } from './keyboard';
+import { makeController } from './keyboard';
 import { Board, makeModel } from './model';
 import * as PIXI from 'pixi.js';
 
@@ -56,7 +56,7 @@ export const makeApp = () => {
 
   window.onresize = resizeCanvas;
 
-  const keyState = makeKeyState({
+  const controller = makeController({
     leftCode: 'ArrowLeft',
     rightCode: 'ArrowRight',
     rotateCode: 'ArrowUp',
@@ -64,14 +64,14 @@ export const makeApp = () => {
   });
 
   app.loader.load(() => {
-    const { initialBoard, updateBoard } = makeModel(keyState);
+    const { initialBoard, updateBoard } = makeModel(controller);
     let gfx = new PIXI.Graphics();
     app.stage.addChild(gfx);
     drawBoard(initialBoard, gfx);
 
     let lastBoard = initialBoard;
     const update = () => {
-      const board = updateBoard(app.ticker.deltaMS);
+      const board = updateBoard();
       if (board !== lastBoard) {
         gfx.clear();
         drawBoard(board, gfx);
