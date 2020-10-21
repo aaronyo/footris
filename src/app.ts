@@ -1,6 +1,6 @@
 // Load application styles
 import { makeController } from './keyboard';
-import { Board, makeModel } from './model';
+import { makeModel, Board, BoardChar } from './model';
 import * as PIXI from 'pixi.js';
 
 const BOARD_WIDTH = 100;
@@ -9,7 +9,22 @@ const ASPECT_RATIO = BOARD_HEIGHT / BOARD_WIDTH;
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
-const drawCell = (x: number, y: number, char: string, gfx: PIXI.Graphics) => {
+const colors = {
+  J: 0xff57cd,
+  L: 0xcd57ff,
+  S: 0x57cdff,
+  T: 0x57ffcd,
+  Z: 0x5757cd,
+  I: 0x57cdcd,
+  O: 0x57cd57,
+};
+
+const drawCell = (
+  x: number,
+  y: number,
+  char: BoardChar,
+  gfx: PIXI.Graphics,
+) => {
   switch (char) {
     case '.':
       gfx.beginFill(0x000000);
@@ -17,7 +32,7 @@ const drawCell = (x: number, y: number, char: string, gfx: PIXI.Graphics) => {
       break;
     default:
       gfx.beginFill(0xffffff);
-      gfx.lineStyle(2, 0x57cdff, 1, 0);
+      gfx.lineStyle(2, colors[char], 1, 0);
       break;
   }
   gfx.drawRect(x * 10, y * 10, 9, 9);

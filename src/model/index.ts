@@ -2,7 +2,16 @@ import * as srs from './srs';
 import _ from '../functional';
 import produce from 'immer';
 import { Controller } from '../keyboard';
-import { parseRegion, Shape, shapeNames, Board, BoardChar } from './util';
+import {
+  parseRegion,
+  Shape,
+  shapeNames,
+  Board,
+  BoardChar,
+  ShapeName,
+} from './util';
+
+export { Board, BoardChar, ShapeName };
 
 const emptyBoard = Object.freeze(
   parseRegion(`
@@ -83,7 +92,7 @@ const shapeHitBottom = (board: Board, fallingShape: Shape) => {
 
 export const makeModel = (controller: Controller) => {
   let fallingShape = spawn();
-  const fallDuration = 500;
+  const fallDuration = 100;
   let board = emptyBoard;
   let pile = emptyBoard;
   let dirty = false;
