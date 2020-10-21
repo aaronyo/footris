@@ -7,14 +7,7 @@
 //
 // The magical implementation described at the end is reproduced here.
 
-import {
-  parseRegion,
-  ShapeName,
-  Shape,
-  Board,
-  Form,
-  RotationIndex,
-} from './util';
+import { parseForm, ShapeName, Shape, Form, RotationIndex } from './util';
 
 import _ from '../functional';
 
@@ -138,16 +131,16 @@ const r2 = _.pipe(rotateClockwise, rotateClockwise);
 const r3 = _.pipe(rotateClockwise, rotateClockwise, rotateClockwise);
 
 const jlstzoRotations = _.mapObjIndexed((spec) => {
-  const form = parseRegion(spec);
+  const form = parseForm(spec);
   return [r0(form), r1(form), r2(form), r3(form)];
 }, rotation0Specs);
 
 const rotations = {
   ...jlstzoRotations,
-  I: _.map(parseRegion, iRotationsSpec),
+  I: _.map(parseForm, iRotationsSpec),
 };
 
-const getForm = ({
+const lookupForm = ({
   name,
   rotation,
 }: {
@@ -158,16 +151,16 @@ const getForm = ({
 const atWrappedIndex = <T extends unknown>(idx: number, arr: readonly T[]) =>
   arr.slice(idx % arr.length)[0];
 
-export const fits = (pile: Board, coords: { x: number; y: number }[]) => {
+export const fits = (well: Form, coords: { x: number; y: number }[]) => {
   return coords.every(
-    ({ x, y }) => x >= 0 && x <= 9 && y <= 20 && pile[y][x] === '.',
+    ({ x, y }) => x >= 0 && x <= 9 && y <= 20 && well[y][x] === '.',
   );
 };
 
 // Returns an array containing {x,y} coordinates for every tile
 // in the shape. This representation is convenient for patching the
-// 2D pile array, while the input 'Shape' form, having a single coordinae,
-// is easier to move and rotate;
+// 2D well array, while the input 'Shape' form, having a single coordinate,
+// is easy to move and rotate (well, if your linear algebra is rusty...);
 const shapeCoords = (shape: Shape) => {
   const coords: { x: number; y: number }[] = [];
   _.forEachIndexed((row, i) => {
@@ -176,11 +169,11 @@ const shapeCoords = (shape: Shape) => {
         coords.push({ y: shape.pos.y + i, x: shape.pos.x + j });
       }
     }, row);
-  }, getForm(shape));
+  }, lookupForm(shape));
   return coords;
 };
 
-const rotateShape = (pile: Board, dir: 1 | -1, shape: Shape) => {
+const rotateShape = (well: Form, dir: 1 | -1, shape: Shape) => {
   const B = offsets[shape.name][shape.rotation];
   const A = atWrappedIndex(shape.rotation + dir, offsets[shape.name]);
   const kickTranslations = _.mapIndexed(
@@ -198,7 +191,7 @@ const rotateShape = (pile: Board, dir: 1 | -1, shape: Shape) => {
       };
       if (
         fits(
-          pile,
+          well,
           shapeCoords({
             pos: coords,
             name: draft.name,
@@ -214,4 +207,4 @@ const rotateShape = (pile: Board, dir: 1 | -1, shape: Shape) => {
   });
 };
 
-export { rotations, offsets, getForm, rotateShape, shapeCoords };
+export { rotations, offsets, lookupForm, rotateShape, shapeCoords };

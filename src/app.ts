@@ -1,11 +1,11 @@
 // Load application styles
 import { makeController } from './keyboard';
-import { makeModel, Board, BoardChar } from './model';
+import { makeModel, Shape, Form, FormChar, Board, lookupForm } from './model';
 import * as PIXI from 'pixi.js';
 
-const BOARD_WIDTH = 100;
-const BOARD_HEIGHT = 200;
-const ASPECT_RATIO = BOARD_HEIGHT / BOARD_WIDTH;
+const WELL_WIDTH = 100;
+const WELL_HEIGHT = 200;
+const ASPECT_RATIO = WELL_HEIGHT / WELL_WIDTH;
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
@@ -19,31 +19,45 @@ const colors = {
   O: 0x57cd57,
 };
 
-const drawCell = (
-  x: number,
-  y: number,
-  char: BoardChar,
-  gfx: PIXI.Graphics,
-) => {
-  switch (char) {
-    case '.':
-      gfx.beginFill(0x000000);
-      gfx.lineStyle(0, 0x000000, 0, 0);
-      break;
-    default:
-      gfx.beginFill(0xffffff);
-      gfx.lineStyle(2, colors[char], 1, 0);
-      break;
-  }
+const drawCell = (x: number, y: number, char: FormChar, gfx: PIXI.Graphics) => {
+  if (char === '.') return;
+  gfx.beginFill(0xffffff);
+  gfx.lineStyle(2, colors[char], 1, 0);
   gfx.drawRect(x * 10, y * 10, 9, 9);
 };
 
-const drawBoard = (board: Board, gfx: PIXI.Graphics) => {
-  board.forEach((line, y) => {
+const drawForm = (
+  pos: { x: number; y: number },
+  form: Form,
+  gfx: PIXI.Graphics,
+) => {
+  form.forEach((line, y) => {
     line.forEach((char, x) => {
-      drawCell(x, y, char, gfx);
+      drawCell(x + pos.x, y + pos.y, char, gfx);
     });
   });
+};
+
+let lastWell: Form;
+let lastFallingShape: Shape;
+const drawBoard = (
+  board: Board,
+  gfx: { well: PIXI.Graphics; fallingShape: PIXI.Graphics },
+) => {
+  if (board.well !== lastWell) {
+    lastWell = board.well;
+    gfx.well.clear();
+    drawForm({ x: 0, y: 0 }, board.well, gfx.well);
+  }
+  if (board.fallingShape !== lastFallingShape) {
+    lastFallingShape = board.fallingShape;
+    gfx.fallingShape.clear();
+    drawForm(
+      board.fallingShape.pos,
+      lookupForm(board.fallingShape),
+      gfx.fallingShape,
+    );
+  }
 };
 
 export const makeApp = () => {
@@ -53,8 +67,8 @@ export const makeApp = () => {
 
   const app = new PIXI.Application({
     backgroundColor: 0x000000,
-    width: BOARD_WIDTH,
-    height: BOARD_HEIGHT,
+    width: WELL_WIDTH,
+    height: WELL_HEIGHT,
     resolution: 1,
   });
 
@@ -79,19 +93,22 @@ export const makeApp = () => {
   });
 
   app.loader.load(() => {
-    const { initialBoard, updateBoard } = makeModel(controller);
-    let gfx = new PIXI.Graphics();
-    app.stage.addChild(gfx);
-    drawBoard(initialBoard, gfx);
+    const { getBoard } = makeModel(controller);
+    const background = new PIXI.Graphics();
+    const gfx = {
+      well: new PIXI.Graphics(),
+      fallingShape: new PIXI.Graphics(),
+    };
+    background.beginFill(0x000000);
+    background.lineStyle(0, 0x000000, 0, 0);
+    background.drawRect(0, 0, WELL_WIDTH, WELL_HEIGHT);
 
-    let lastBoard = initialBoard;
+    app.stage.addChild(gfx.well);
+    app.stage.addChild(gfx.fallingShape);
+    drawBoard(getBoard(), gfx);
+
     const update = () => {
-      const board = updateBoard();
-      if (board !== lastBoard) {
-        gfx.clear();
-        drawBoard(board, gfx);
-        lastBoard = board;
-      }
+      drawBoard(getBoard(), gfx);
     };
 
     app.ticker.add(update);

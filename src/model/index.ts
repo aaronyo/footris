@@ -3,18 +3,28 @@ import _ from '../functional';
 import produce from 'immer';
 import { Controller } from '../keyboard';
 import {
-  parseRegion,
+  parseForm,
   Shape,
   shapeNames,
-  Board,
-  BoardChar,
+  Form,
+  FormChar,
   ShapeName,
 } from './util';
 
-export { Board, BoardChar, ShapeName };
+const lookupForm = srs.lookupForm;
+export { Shape, Form, FormChar, ShapeName, lookupForm };
 
-const emptyBoard = Object.freeze(
-  parseRegion(`
+export interface Board {
+  well: Form;
+  fallingShape: Shape;
+  clearingLines: {
+    index: number;
+    pct: number;
+  }[];
+}
+
+const emptyWell = Object.freeze(
+  parseForm(`
 ..........
 ..........
 ..........
@@ -50,8 +60,8 @@ const spawn = (): Shape => {
   };
 };
 
-const addShape = (fallingShape: Shape, board: Board) => {
-  return produce(board, (draft) => {
+const landShape = (fallingShape: Shape, well: Form) => {
+  return produce(well, (draft) => {
     srs
       .shapeCoords(fallingShape)
       .filter((coord) => coord.y >= 0 && coord.y <= 19)
@@ -61,16 +71,16 @@ const addShape = (fallingShape: Shape, board: Board) => {
   });
 };
 
-const shiftShape = (pile: Board, increment: number, s: Shape) => {
+const shiftShape = (well: Form, increment: number, s: Shape) => {
   const newShape = produce(s, (draft) => {
     draft.pos.x += increment;
   });
-  return srs.fits(pile, srs.shapeCoords(newShape)) ? newShape : s;
+  return srs.fits(well, srs.shapeCoords(newShape)) ? newShape : s;
 };
 
-const pileTop = (board: Board) => {
+const pileTop = (well: Form) => {
   return _.range(0, 10).map((x) => {
-    const topY = board.map((row) => _.nth(x, row)).findIndex((c) => c !== '.');
+    const topY = well.map((row) => _.nth(x, row)).findIndex((c) => c !== '.');
     return {
       x,
       y: topY === -1 ? 20 : topY,
@@ -78,9 +88,8 @@ const pileTop = (board: Board) => {
   });
 };
 
-const shapeHitBottom = (board: Board, fallingShape: Shape) => {
-  const topCoords = pileTop(board);
-  console.log('pile', topCoords);
+const shapeHitBottom = (well: Form, fallingShape: Shape) => {
+  const topCoords = pileTop(well);
   if (
     srs
       .shapeCoords(fallingShape)
@@ -91,48 +100,42 @@ const shapeHitBottom = (board: Board, fallingShape: Shape) => {
   return false;
 };
 
+const makeBoard = () => ({
+  well: emptyWell,
+  fallingShape: spawn(),
+  clearingLines: [],
+});
+
 export const makeModel = (controller: Controller) => {
-  let fallingShape = spawn();
   const fallDuration = 100;
-  let board = emptyBoard;
-  let pile = emptyBoard;
-  let dirty = false;
+  const board = makeBoard();
 
   controller.whileRotatePressed(() => {
-    fallingShape = srs.rotateShape(pile, 1, fallingShape);
-    dirty = true;
+    board.fallingShape = srs.rotateShape(board.well, 1, board.fallingShape);
   });
 
   controller.whileLeftPressed(() => {
-    fallingShape = shiftShape(pile, -1, fallingShape);
-    dirty = true;
+    board.fallingShape = shiftShape(board.well, -1, board.fallingShape);
   });
 
   controller.whileRightPressed(() => {
-    fallingShape = shiftShape(pile, 1, fallingShape);
-    dirty = true;
+    board.fallingShape = shiftShape(board.well, 1, board.fallingShape);
   });
 
-  const fallInterval = setInterval(() => {
-    if (shapeHitBottom(pile, fallingShape)) {
-      pile = addShape(fallingShape, pile);
-      fallingShape = spawn();
-      dirty = true;
+  setInterval(() => {
+    if (shapeHitBottom(board.well, board.fallingShape)) {
+      board.well = landShape(board.fallingShape, board.well);
+      board.fallingShape = spawn();
       return;
     }
-    fallingShape = produce(fallingShape, (draft) => {
+    board.fallingShape = produce(board.fallingShape, (draft) => {
       draft.pos.y += 1;
     });
-    dirty = true;
   }, fallDuration);
 
-  const updateBoard = () => {
-    if (dirty) {
-      board = addShape(fallingShape, pile);
-      dirty = false;
-    }
+  const getBoard = () => {
     return board;
   };
 
-  return { updateBoard, initialBoard: board };
+  return { getBoard };
 };
