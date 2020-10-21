@@ -14,7 +14,6 @@ import {
   Board,
   Form,
   RotationIndex,
-  shapeCoords,
 } from './util';
 
 import _ from '../functional';
@@ -148,13 +147,35 @@ const rotations = {
   I: _.map(parseRegion, iRotationsSpec),
 };
 
-const getForm = (name: ShapeName, idx: RotationIndex) => rotations[name][idx];
+const getForm = ({
+  name,
+  rotation,
+}: {
+  name: ShapeName;
+  rotation: RotationIndex;
+}) => rotations[name][rotation];
 
 const atWrappedIndex = <T extends unknown>(idx: number, arr: readonly T[]) =>
   arr.slice(idx % arr.length)[0];
 
 const fits = (board: Board, coords: { x: number; y: number }[]) => {
   return _.all(({ x, y }) => x >= 0 && x <= 9 && y <= 20, coords);
+};
+
+// Returns an array containing {x,y} coordinates for every tile
+// in the shape. This representation is convenient for patching the
+// 2D board array, while the input 'Shape' form, having a single coordinae,
+// is easier to move and rotate;
+const shapeCoords = (shape: Shape) => {
+  const coords: { x: number; y: number }[] = [];
+  _.forEachIndexed((row, i) => {
+    _.forEachIndexed((cell, j) => {
+      if (cell !== '.') {
+        coords.push({ y: shape.pos.y + i, x: shape.pos.x + j });
+      }
+    }, row);
+  }, getForm(shape));
+  return coords;
 };
 
 const rotateShape = (board: Board, dir: 1 | -1, shape: Shape) => {
@@ -173,7 +194,16 @@ const rotateShape = (board: Board, dir: 1 | -1, shape: Shape) => {
         x: shape.pos.x + k[0],
         y: shape.pos.y - k[1],
       };
-      if (fits(board, shapeCoords(getForm(draft.name, nextRotation), coords))) {
+      if (
+        fits(
+          board,
+          shapeCoords({
+            pos: coords,
+            name: draft.name,
+            rotation: nextRotation,
+          }),
+        )
+      ) {
         draft.rotation = nextRotation;
         draft.pos = coords;
         return;
@@ -182,4 +212,4 @@ const rotateShape = (board: Board, dir: 1 | -1, shape: Shape) => {
   });
 };
 
-export { rotations, offsets, getForm, rotateShape };
+export { rotations, offsets, getForm, rotateShape, shapeCoords };

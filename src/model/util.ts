@@ -33,19 +33,3 @@ export const parseRegion = (text: string): Board => {
     .split('\n')
     .map((line) => line.split('')) as Board;
 };
-
-// Returns an array containing {x,y} coordinates for every tile
-// in the shape. This representation is convenient for patching the
-// 2D board array, while the input 'Shape' form, having a single coordinae,
-// is easier to move and rotate;
-export const shapeCoords = (form: Form, origin: { x: number; y: number }) => {
-  const coords: { x: number; y: number }[] = [];
-  _.forEachIndexed((row, i) => {
-    _.forEachIndexed((cell, j) => {
-      if (cell !== '.') {
-        coords.push({ y: origin.y + i, x: origin.x + j });
-      }
-    }, row);
-  }, form);
-  return coords;
-};
