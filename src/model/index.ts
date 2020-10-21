@@ -61,10 +61,11 @@ const addShape = (fallingShape: Shape, board: Board) => {
   });
 };
 
-const shiftShape = (increment: number, s: Shape) => {
-  return produce(s, (draft) => {
+const shiftShape = (pile: Board, increment: number, s: Shape) => {
+  const newShape = produce(s, (draft) => {
     draft.pos.x += increment;
   });
+  return srs.fits(pile, srs.shapeCoords(newShape)) ? newShape : s;
 };
 
 const pileTop = (board: Board) => {
@@ -103,12 +104,12 @@ export const makeModel = (controller: Controller) => {
   });
 
   controller.whileLeftPressed(() => {
-    fallingShape = shiftShape(-1, fallingShape);
+    fallingShape = shiftShape(pile, -1, fallingShape);
     dirty = true;
   });
 
   controller.whileRightPressed(() => {
-    fallingShape = shiftShape(1, fallingShape);
+    fallingShape = shiftShape(pile, 1, fallingShape);
     dirty = true;
   });
 

@@ -158,13 +158,15 @@ const getForm = ({
 const atWrappedIndex = <T extends unknown>(idx: number, arr: readonly T[]) =>
   arr.slice(idx % arr.length)[0];
 
-const fits = (board: Board, coords: { x: number; y: number }[]) => {
-  return _.all(({ x, y }) => x >= 0 && x <= 9 && y <= 20, coords);
+export const fits = (pile: Board, coords: { x: number; y: number }[]) => {
+  return coords.every(
+    ({ x, y }) => x >= 0 && x <= 9 && y <= 20 && pile[y][x] === '.',
+  );
 };
 
 // Returns an array containing {x,y} coordinates for every tile
 // in the shape. This representation is convenient for patching the
-// 2D board array, while the input 'Shape' form, having a single coordinae,
+// 2D pile array, while the input 'Shape' form, having a single coordinae,
 // is easier to move and rotate;
 const shapeCoords = (shape: Shape) => {
   const coords: { x: number; y: number }[] = [];
@@ -178,7 +180,7 @@ const shapeCoords = (shape: Shape) => {
   return coords;
 };
 
-const rotateShape = (board: Board, dir: 1 | -1, shape: Shape) => {
+const rotateShape = (pile: Board, dir: 1 | -1, shape: Shape) => {
   const B = offsets[shape.name][shape.rotation];
   const A = atWrappedIndex(shape.rotation + dir, offsets[shape.name]);
   const kickTranslations = _.mapIndexed(
@@ -196,7 +198,7 @@ const rotateShape = (board: Board, dir: 1 | -1, shape: Shape) => {
       };
       if (
         fits(
-          board,
+          pile,
           shapeCoords({
             pos: coords,
             name: draft.name,
