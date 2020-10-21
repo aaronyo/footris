@@ -78,26 +78,10 @@ const shiftShape = (well: Form, increment: number, s: Shape) => {
   return srs.fits(well, srs.shapeCoords(newShape)) ? newShape : s;
 };
 
-const pileTop = (well: Form) => {
-  return _.range(0, 10).map((x) => {
-    const topY = well.map((row) => _.nth(x, row)).findIndex((c) => c !== '.');
-    return {
-      x,
-      y: topY === -1 ? 20 : topY,
-    };
-  });
-};
-
-const shapeHitBottom = (well: Form, fallingShape: Shape) => {
-  const topCoords = pileTop(well);
-  if (
-    srs
-      .shapeCoords(fallingShape)
-      .some((s) => topCoords.some((t) => s.x === t.x && s.y + 1 === t.y))
-  ) {
-    return true;
-  }
-  return false;
+const shapeShouldLand = (well: Form, fallingShape: Shape) => {
+  return srs
+    .shapeCoords(fallingShape)
+    .some((sc) => sc.y >= -1 && (sc.y === 19 || well[sc.y + 1][sc.x] !== '.'));
 };
 
 const makeBoard = () => ({
@@ -123,7 +107,7 @@ export const makeModel = (controller: Controller) => {
   });
 
   setInterval(() => {
-    if (shapeHitBottom(board.well, board.fallingShape)) {
+    if (shapeShouldLand(board.well, board.fallingShape)) {
       board.well = landShape(board.fallingShape, board.well);
       board.fallingShape = spawn();
       return;
