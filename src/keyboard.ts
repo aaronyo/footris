@@ -29,42 +29,48 @@ const bindKey = (
   window.addEventListener('keyup', upHandler, false);
 };
 
-const whileKeyPressed = (millis: number, keyCode: string) => (
-  callback: () => void,
-) => {
-  let interval: number;
+const whileKeyPressed = (
+  keyCode: string,
+  firstDelay: number,
+  repeatDelay: number,
+) => (callback: () => void) => {
+  let firstTimer: number;
+  let repeatTimer: number;
   bindKey(keyCode, {
     press: () => {
       callback();
-      interval = window.setInterval(callback, millis);
+      firstTimer = window.setTimeout(() => {
+        repeatTimer = window.setInterval(callback, repeatDelay);
+      }, firstDelay);
     },
     release: () => {
-      clearInterval(interval);
+      window.clearTimeout(firstTimer);
+      window.clearInterval(repeatTimer);
     },
   });
 };
 
+type keyArgs = [string, number, number];
+
 export const makeController = ({
-  leftCode,
-  rightCode,
-  rotateLeftCode,
-  rotateRightCode,
-  downCode,
-  delayMillis = 200,
+  left,
+  right,
+  rotateLeft,
+  rotateRight,
+  down,
 }: {
-  leftCode: string;
-  rightCode: string;
-  rotateLeftCode: string;
-  rotateRightCode: string;
-  downCode: string;
-  delayMillis: number;
+  left: keyArgs;
+  right: keyArgs;
+  rotateLeft: keyArgs;
+  rotateRight: keyArgs;
+  down: keyArgs;
 }) => {
   return {
-    whileLeftPressed: whileKeyPressed(delayMillis, leftCode),
-    whileRightPressed: whileKeyPressed(delayMillis, rightCode),
-    whileRotateLeftPressed: whileKeyPressed(delayMillis, rotateLeftCode),
-    whileRotateRightPressed: whileKeyPressed(delayMillis, rotateRightCode),
-    whileDownPressed: whileKeyPressed(delayMillis, downCode),
+    whileLeftPressed: whileKeyPressed(...left),
+    whileRightPressed: whileKeyPressed(...right),
+    whileRotateLeftPressed: whileKeyPressed(...rotateLeft),
+    whileRotateRightPressed: whileKeyPressed(...rotateRight),
+    whileDownPressed: whileKeyPressed(...down),
   };
 };
 

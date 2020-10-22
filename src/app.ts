@@ -86,12 +86,11 @@ export const makeApp = () => {
   window.onresize = resizeCanvas;
 
   const controller = makeController({
-    leftCode: 'ArrowLeft',
-    rightCode: 'ArrowRight',
-    rotateLeftCode: 'a',
-    rotateRightCode: 's',
-    downCode: 'ArrowDown',
-    delayMillis: 100,
+    left: ['ArrowLeft', 300, 100],
+    right: ['ArrowRight', 300, 100],
+    rotateLeft: ['a', 300, 100],
+    rotateRight: ['s', 300, 100],
+    down: ['ArrowDown', 50, 50],
   });
 
   app.loader.load(() => {
