@@ -88,12 +88,14 @@ export const makeApp = () => {
   const controller = makeController({
     leftCode: 'ArrowLeft',
     rightCode: 'ArrowRight',
-    rotateCode: 'ArrowUp',
+    rotateLeftCode: 'a',
+    rotateRightCode: 's',
     downCode: 'ArrowDown',
+    delayMillis: 100,
   });
 
   app.loader.load(() => {
-    const { getBoard } = makeModel(controller);
+    const { getBoard } = makeModel(controller, 500);
     const background = new PIXI.Graphics();
     const gfx = {
       well: new PIXI.Graphics(),

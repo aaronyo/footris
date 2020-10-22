@@ -95,11 +95,29 @@ const makeBoard = (): Board => ({
 const isTooHigh = (shape: Shape) =>
   srs.shapeCoords(shape).some(({ y }) => y < 0);
 
-export const makeModel = (controller: Controller) => {
-  const fallDuration = 100;
+const lowerShape = (board: Board) => {
+  if (shapeShouldLand(board.well, board.fallingShape)) {
+    board.well = landShape(board.fallingShape, board.well);
+    if (isTooHigh(board.fallingShape)) {
+      board.gameOver = true;
+      return;
+    }
+    board.fallingShape = spawn();
+    return;
+  }
+  board.fallingShape = produce(board.fallingShape, (draft) => {
+    draft.pos.y += 1;
+  });
+};
+
+export const makeModel = (controller: Controller, speed: number) => {
   const board = makeBoard();
 
-  controller.whileRotatePressed(() => {
+  controller.whileRotateLeftPressed(() => {
+    board.fallingShape = srs.rotateShape(board.well, -1, board.fallingShape);
+  });
+
+  controller.whileRotateRightPressed(() => {
     board.fallingShape = srs.rotateShape(board.well, 1, board.fallingShape);
   });
 
@@ -111,21 +129,20 @@ export const makeModel = (controller: Controller) => {
     board.fallingShape = shiftShape(board.well, 1, board.fallingShape);
   });
 
-  const fallingInterval = setInterval(() => {
-    if (shapeShouldLand(board.well, board.fallingShape)) {
-      board.well = landShape(board.fallingShape, board.well);
-      if (isTooHigh(board.fallingShape)) {
-        board.gameOver = true;
-        clearInterval(fallingInterval);
-        return;
-      }
-      board.fallingShape = spawn();
-      return;
+  const fallHandler = () => {
+    lowerShape(board);
+    if (board.gameOver) {
+      clearInterval(fallingInterval);
     }
-    board.fallingShape = produce(board.fallingShape, (draft) => {
-      draft.pos.y += 1;
-    });
-  }, fallDuration);
+  };
+
+  let fallingInterval = setInterval(fallHandler, speed);
+
+  controller.whileDownPressed(() => {
+    lowerShape(board);
+    clearInterval(fallingInterval);
+    fallingInterval = setInterval(fallHandler, speed);
+  });
 
   const getBoard = () => {
     return board;

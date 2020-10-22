@@ -44,61 +44,28 @@ const whileKeyPressed = (millis: number, keyCode: string) => (
   });
 };
 
-const bindKeyToState = (keyCode: string, state: { isDown: boolean }) => {
-  bindKey(keyCode, {
-    press: () => {
-      state.isDown = true;
-    },
-    release: () => {
-      state.isDown = false;
-    },
-  });
-};
-
-export const makeKeyState = ({
-  leftCode,
-  rightCode,
-  rotateCode,
-  downCode,
-}: {
-  leftCode: string;
-  rightCode: string;
-  rotateCode: string;
-  downCode: string;
-}) => {
-  const state = {
-    left: { isDown: false },
-    right: { isDown: false },
-    rotate: { isDown: false },
-    down: { isDown: false },
-  };
-
-  bindKeyToState(leftCode, state.left);
-  bindKeyToState(rightCode, state.right);
-  bindKeyToState(rotateCode, state.rotate);
-  bindKeyToState(downCode, state.down);
-
-  return state;
-};
-
 export const makeController = ({
   leftCode,
   rightCode,
-  rotateCode,
+  rotateLeftCode,
+  rotateRightCode,
   downCode,
+  delayMillis = 200,
 }: {
   leftCode: string;
   rightCode: string;
-  rotateCode: string;
+  rotateLeftCode: string;
+  rotateRightCode: string;
   downCode: string;
+  delayMillis: number;
 }) => {
   return {
-    whileLeftPressed: whileKeyPressed(200, leftCode),
-    whileRightPressed: whileKeyPressed(200, rightCode),
-    whileRotatePressed: whileKeyPressed(200, rotateCode),
-    whileDownPressed: whileKeyPressed(200, downCode),
+    whileLeftPressed: whileKeyPressed(delayMillis, leftCode),
+    whileRightPressed: whileKeyPressed(delayMillis, rightCode),
+    whileRotateLeftPressed: whileKeyPressed(delayMillis, rotateLeftCode),
+    whileRotateRightPressed: whileKeyPressed(delayMillis, rotateRightCode),
+    whileDownPressed: whileKeyPressed(delayMillis, downCode),
   };
 };
 
-export type KeyState = ReturnType<typeof makeKeyState>;
 export type Controller = ReturnType<typeof makeController>;

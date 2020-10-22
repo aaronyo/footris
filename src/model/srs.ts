@@ -153,7 +153,7 @@ const atWrappedIndex = <T extends unknown>(idx: number, arr: readonly T[]) =>
 
 export const fits = (well: Form, coords: { x: number; y: number }[]) => {
   return coords.every(
-    ({ x, y }) => x >= 0 && x <= 9 && y <= 20 && well[y][x] === '.',
+    ({ x, y }) => y < 0 || (x >= 0 && x <= 9 && y <= 20 && well[y][x] === '.'),
   );
 };
 
