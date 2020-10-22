@@ -1,21 +1,21 @@
 import * as srs from './srs';
 import _ from '../functional';
 import produce from 'immer';
-import { Controller } from '../keyboard';
+import { Controller } from '../controller';
 import {
-  parseForm,
+  parseRegion,
   Shape,
   shapeNames,
-  Form,
-  FormChar,
+  Region,
+  RegionChar,
   ShapeName,
 } from './util';
 
 const lookupForm = srs.lookupForm;
-export { Shape, Form, FormChar, ShapeName, lookupForm };
+export { Shape, Region, RegionChar, ShapeName, lookupForm };
 
 export interface Board {
-  well: Form;
+  well: Region;
   fallingShape: Shape;
   clearingLines: {
     index: number;
@@ -25,7 +25,7 @@ export interface Board {
 }
 
 const emptyWell = Object.freeze(
-  parseForm(`
+  parseRegion(`
 ..........
 ..........
 ..........
@@ -61,7 +61,7 @@ const spawn = (): Shape => {
   };
 };
 
-const landShape = (fallingShape: Shape, well: Form) => {
+const landShape = (fallingShape: Shape, well: Region) => {
   return produce(well, (draft) => {
     srs
       .shapeCoords(fallingShape)
@@ -72,14 +72,14 @@ const landShape = (fallingShape: Shape, well: Form) => {
   });
 };
 
-const shiftShape = (well: Form, increment: number, s: Shape) => {
+const shiftShape = (well: Region, increment: number, s: Shape) => {
   const newShape = produce(s, (draft) => {
     draft.pos.x += increment;
   });
   return srs.fits(well, srs.shapeCoords(newShape)) ? newShape : s;
 };
 
-const shapeShouldLand = (well: Form, fallingShape: Shape) => {
+const shapeShouldLand = (well: Region, fallingShape: Shape) => {
   return srs
     .shapeCoords(fallingShape)
     .some((sc) => sc.y >= -1 && (sc.y === 19 || well[sc.y + 1][sc.x] !== '.'));

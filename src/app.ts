@@ -1,6 +1,13 @@
 // Load application styles
 import { makeController } from './controller';
-import { makeModel, Shape, Form, FormChar, Board, lookupForm } from './model';
+import {
+  makeModel,
+  Shape,
+  Region,
+  RegionChar,
+  Board,
+  lookupForm,
+} from './model';
 import * as PIXI from 'pixi.js';
 
 const WELL_WIDTH = 100;
@@ -19,16 +26,21 @@ const colors = {
   O: 0x57cd57,
 };
 
-const drawCell = (x: number, y: number, char: FormChar, gfx: PIXI.Graphics) => {
+const drawCell = (
+  x: number,
+  y: number,
+  char: RegionChar,
+  gfx: PIXI.Graphics,
+) => {
   if (char === '.') return;
   gfx.beginFill(0xffffff);
   gfx.lineStyle(2, colors[char], 1, 0);
   gfx.drawRect(x * 10, y * 10, 9, 9);
 };
 
-const drawForm = (
+const drawRegion = (
   pos: { x: number; y: number },
-  form: Form,
+  form: Region,
   gfx: PIXI.Graphics,
 ) => {
   form.forEach((line, y) => {
@@ -38,7 +50,7 @@ const drawForm = (
   });
 };
 
-let lastWell: Form;
+let lastWell: Region;
 let lastFallingShape: Shape;
 const drawBoard = (
   board: Board,
@@ -47,12 +59,12 @@ const drawBoard = (
   if (board.well !== lastWell) {
     lastWell = board.well;
     gfx.well.clear();
-    drawForm({ x: 0, y: 0 }, board.well, gfx.well);
+    drawRegion({ x: 0, y: 0 }, board.well, gfx.well);
   }
   if (board.fallingShape !== lastFallingShape) {
     lastFallingShape = board.fallingShape;
     gfx.fallingShape.clear();
-    drawForm(
+    drawRegion(
       board.fallingShape.pos,
       lookupForm(board.fallingShape),
       gfx.fallingShape,

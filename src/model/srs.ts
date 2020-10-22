@@ -7,7 +7,7 @@
 //
 // The magical implementation described at the end is reproduced here.
 
-import { parseForm, ShapeName, Shape, Form, RotationIndex } from './util';
+import { parseRegion, ShapeName, Shape, Region, RotationIndex } from './util';
 
 import _ from '../functional';
 
@@ -131,13 +131,13 @@ const r2 = _.pipe(rotateClockwise, rotateClockwise);
 const r3 = _.pipe(rotateClockwise, rotateClockwise, rotateClockwise);
 
 const jlstzoRotations = _.mapObjIndexed((spec) => {
-  const form = parseForm(spec);
+  const form = parseRegion(spec);
   return [r0(form), r1(form), r2(form), r3(form)];
 }, rotation0Specs);
 
 const rotations = {
   ...jlstzoRotations,
-  I: _.map(parseForm, iRotationsSpec),
+  I: _.map(parseRegion, iRotationsSpec),
 };
 
 const lookupForm = ({
@@ -151,7 +151,7 @@ const lookupForm = ({
 const atWrappedIndex = <T extends unknown>(idx: number, arr: readonly T[]) =>
   arr.slice(idx % arr.length)[0];
 
-export const fits = (well: Form, coords: { x: number; y: number }[]) => {
+export const fits = (well: Region, coords: { x: number; y: number }[]) => {
   return coords.every(
     ({ x, y }) => y < 0 || (x >= 0 && x <= 9 && y <= 20 && well[y][x] === '.'),
   );
@@ -173,7 +173,7 @@ const shapeCoords = (shape: Shape) => {
   return coords;
 };
 
-const rotateShape = (well: Form, dir: 1 | -1, shape: Shape) => {
+const rotateShape = (well: Region, dir: 1 | -1, shape: Shape) => {
   const B = offsets[shape.name][shape.rotation];
   const A = atWrappedIndex(shape.rotation + dir, offsets[shape.name]);
   const kickTranslations = _.mapIndexed(
