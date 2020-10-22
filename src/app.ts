@@ -1,5 +1,5 @@
 // Load application styles
-import { makeController } from './keyboard';
+import { makeController } from './controller';
 import { makeModel, Shape, Form, FormChar, Board, lookupForm } from './model';
 import * as PIXI from 'pixi.js';
 
