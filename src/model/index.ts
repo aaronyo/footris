@@ -21,6 +21,7 @@ export interface Board {
     index: number;
     pct: number;
   }[];
+  gameOver: boolean;
 }
 
 const emptyWell = Object.freeze(
@@ -84,11 +85,15 @@ const shapeShouldLand = (well: Form, fallingShape: Shape) => {
     .some((sc) => sc.y >= -1 && (sc.y === 19 || well[sc.y + 1][sc.x] !== '.'));
 };
 
-const makeBoard = () => ({
+const makeBoard = (): Board => ({
   well: emptyWell,
   fallingShape: spawn(),
   clearingLines: [],
+  gameOver: false,
 });
+
+const isTooHigh = (shape: Shape) =>
+  srs.shapeCoords(shape).some(({ y }) => y < 0);
 
 export const makeModel = (controller: Controller) => {
   const fallDuration = 100;
@@ -106,9 +111,14 @@ export const makeModel = (controller: Controller) => {
     board.fallingShape = shiftShape(board.well, 1, board.fallingShape);
   });
 
-  setInterval(() => {
+  const fallingInterval = setInterval(() => {
     if (shapeShouldLand(board.well, board.fallingShape)) {
       board.well = landShape(board.fallingShape, board.well);
+      if (isTooHigh(board.fallingShape)) {
+        board.gameOver = true;
+        clearInterval(fallingInterval);
+        return;
+      }
       board.fallingShape = spawn();
       return;
     }
