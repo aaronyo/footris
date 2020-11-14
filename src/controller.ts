@@ -50,7 +50,7 @@ const whileKeyPressed = (
   });
 };
 
-type keyArgs = [string, number, number];
+type KeyArgs = [string, number, number];
 
 export const makeController = ({
   left,
@@ -59,11 +59,11 @@ export const makeController = ({
   rotateRight,
   down,
 }: {
-  left: keyArgs;
-  right: keyArgs;
-  rotateLeft: keyArgs;
-  rotateRight: keyArgs;
-  down: keyArgs;
+  left: KeyArgs;
+  right: KeyArgs;
+  rotateLeft: KeyArgs;
+  rotateRight: KeyArgs;
+  down: KeyArgs;
 }) => {
   return {
     whileLeftPressed: whileKeyPressed(...left),

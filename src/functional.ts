@@ -25,6 +25,19 @@ const randomFrom = <T extends unknown>(arr: readonly T[]) => {
   return arr[Math.floor(Math.random() * arr.length)];
 };
 
+export type Mutable<T> = {
+  -readonly [P in keyof T]: T[P];
+};
+
+const shuffle = <T extends unknown>(arr: readonly T[]): T[] => {
+  return produce(arr, (d) => {
+    for (let i = d.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [d[i], d[j]] = [d[j], d[i]];
+    }
+  }) as Mutable<T[]>;
+};
+
 export default {
   ...R,
   mapIndexed,
@@ -33,4 +46,5 @@ export default {
   randomKey,
   produce,
   randomFrom,
+  shuffle,
 };

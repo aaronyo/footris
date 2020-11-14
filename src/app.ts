@@ -10,8 +10,8 @@ import {
 } from './model';
 import * as PIXI from 'pixi.js';
 
-const WELL_WIDTH = 100;
-const WELL_HEIGHT = 200;
+const WELL_WIDTH = 101;
+const WELL_HEIGHT = 201;
 const ASPECT_RATIO = WELL_HEIGHT / WELL_WIDTH;
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
@@ -35,7 +35,7 @@ const drawCell = (
   if (char === '.') return;
   gfx.beginFill(0xffffff);
   gfx.lineStyle(2, colors[char], 1, 0);
-  gfx.drawRect(x * 10, y * 10, 9, 9);
+  gfx.drawRect(1 + x * 10, 1 + y * 10, 9, 9);
 };
 
 const drawRegion = (

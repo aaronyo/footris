@@ -17,14 +17,14 @@ export const shapeNames: readonly ShapeChar[] = [
   'O',
 ];
 
-export interface Shape {
-  pos: {
+export type Shape = Readonly<{
+  pos: Readonly<{
     x: number;
     y: number;
-  };
+  }>;
   name: ShapeName;
   rotation: RotationIndex;
-}
+}>;
 
 export const parseRegion = (text: string): Region => {
   return text
